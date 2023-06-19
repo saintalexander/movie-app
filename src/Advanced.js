@@ -70,6 +70,25 @@ function Advanced() {
 
   const currentMovie = movies[currentIndex] || {};
 
+  useEffect(() => {
+    const handleResize = () => {
+      // Adjust swipeThreshold based on screen width
+      const screenWidth = window.innerWidth;
+      const swipeThreshold = Math.min(0.25 * screenWidth, 100);
+      setSwipeThreshold(swipeThreshold);
+    };
+
+    handleResize(); // Initialize swipeThreshold on component mount
+
+    window.addEventListener('resize', handleResize); // Update swipeThreshold on window resize
+
+    return () => {
+      window.removeEventListener('resize', handleResize); // Cleanup event listener
+    };
+  }, []);
+
+  const [swipeThreshold, setSwipeThreshold] = useState(100); // Initialize swipeThreshold
+
   return (
     <div className="root">
       <link
@@ -80,7 +99,11 @@ function Advanced() {
         href="https://fonts.googleapis.com/css?family=Alatsi&display=swap"
         rel="stylesheet"
       />
-      <h1> </h1>
+      <div
+          className="backgroundImage"
+          style={{ backgroundImage: `url(${currentMovie.url})` }}
+        />
+      <h1>React Tinder Card</h1>
       <div className="cardContainer">
         {movies.map((character, index) => (
           <TinderCard
@@ -92,7 +115,7 @@ function Advanced() {
             onCardLeftScreen={() => outOfFrame(character.name, index)}
             preventSwipe={['up', 'down']}
             swipeRequirementType="position"
-            swipeThreshold={100}
+            swipeThreshold={swipeThreshold} // Use the dynamically calculated swipeThreshold
           >
             <div
               style={{ backgroundImage: `url(${character.url})` }}
@@ -120,7 +143,7 @@ function Advanced() {
         </h2>
       ) : (
         <h2 className="infoText">
-          Swipe a card or press a button to get Restore Card button visible!
+          Swipe a card or press a button to get the Restore Card button visible!
         </h2>
       )}
     </div>
