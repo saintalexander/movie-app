@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import TinderCard from 'react-tinder-card';
-import axios from 'axios';
-
-const API_KEY = 'ad82ec89168667e5ce9d481959e1e57f';
+import ColorThief from 'colorthief';
+import { fetchMovies } from './movieService';
 
 function Advanced() {
   const [movies, setMovies] = useState([]);
@@ -11,31 +10,40 @@ function Advanced() {
   const currentIndexRef = useRef(currentIndex);
   const childRefs = useMemo(() => Array(movies.length).fill(0).map(() => React.createRef()), [movies]);
 
-  const fetchMovies = async () => {
-    try {
-      const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
-        params: {
-          api_key: API_KEY,
-        },
-      });
-      setMovies(
-        response.data.results.map((movie) => ({
-          name: movie.title,
-          url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
-        }))
-      );
-    } catch (error) {
-      console.error('Error fetching movies:', error);
-    }
+  const fetchDominantColor = async (url) => {
+    const colorThief = new ColorThief();
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+
+    return new Promise((resolve) => {
+      img.onload = function () {
+        const color = colorThief.getColor(this);
+        resolve(color);
+      };
+
+      img.src = url;
+    });
   };
 
   useEffect(() => {
-    fetchMovies();
-  }, []);
+    const fetchColor = async () => {
+      const color = await fetchDominantColor(movies[currentIndex]?.url);
+      const gradientStart = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+      const gradientEnd = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      setGradient(`linear-gradient(${gradientStart} 33%, ${gradientEnd} 67%)`);
+    };
+
+    fetchColor();
+  }, [currentIndex, movies]);
 
   useEffect(() => {
-    setCurrentIndex(movies.length - 1);
-  }, [movies]);
+    const getMovies = async () => {
+      const movies = await fetchMovies();
+      setMovies(movies);
+    };
+
+    getMovies();
+  }, []);
 
   const updateCurrentIndex = (val) => {
     setCurrentIndex(val);
@@ -69,41 +77,14 @@ function Advanced() {
   };
 
   const currentMovie = movies[currentIndex] || {};
-
-  useEffect(() => {
-    const handleResize = () => {
-      // Adjust swipeThreshold based on screen width
-      const screenWidth = window.innerWidth;
-      const swipeThreshold = Math.min(0.25 * screenWidth, 100);
-      setSwipeThreshold(swipeThreshold);
-    };
-
-    handleResize(); // Initialize swipeThreshold on component mount
-
-    window.addEventListener('resize', handleResize); // Update swipeThreshold on window resize
-
-    return () => {
-      window.removeEventListener('resize', handleResize); // Cleanup event listener
-    };
-  }, []);
-
-  const [swipeThreshold, setSwipeThreshold] = useState(100); // Initialize swipeThreshold
+  const [gradient, setGradient] = useState('');
 
   return (
-    <div className="root">
-      <link
-        href="https://fonts.googleapis.com/css?family=Damion&display=swap"
-        rel="stylesheet"
-      />
-      <link
-        href="https://fonts.googleapis.com/css?family=Alatsi&display=swap"
-        rel="stylesheet"
-      />
-      <div
-          className="backgroundImage"
-          style={{ backgroundImage: `url(${currentMovie.url})` }}
-        />
-      <h1>React Tinder Card</h1>
+    <div className="root" style={{ backgroundImage: gradient }}>
+      <link href="https://fonts.googleapis.com/css?family=Damion&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css?family=Alatsi&display=swap" rel="stylesheet" />
+      <div className="backgroundImage" style={{ backgroundImage: `url(${currentMovie.url})` }} />
+      <h1> </h1>
       <div className="cardContainer">
         {movies.map((character, index) => (
           <TinderCard
@@ -115,7 +96,6 @@ function Advanced() {
             onCardLeftScreen={() => outOfFrame(character.name, index)}
             preventSwipe={['up', 'down']}
             swipeRequirementType="position"
-            swipeThreshold={swipeThreshold} // Use the dynamically calculated swipeThreshold
           >
             <div
               style={{ backgroundImage: `url(${character.url})` }}
