@@ -6,7 +6,7 @@ import Advanced from './Advanced'
 
 
 function App () {
-  const [showAdvanced, setShowAdvanced] = useState(true)
+  
 
   return (
     <div className='app'>

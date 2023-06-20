@@ -2,6 +2,11 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import TinderCard from 'react-tinder-card';
 import ColorThief from 'colorthief';
 import { fetchMovies } from './movieService';
+import IconButton from '@mui/material/IconButton';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import UndoIcon from '@mui/icons-material/Undo';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+
 
 function Advanced() {
   const [movies, setMovies] = useState([]);
@@ -9,6 +14,17 @@ function Advanced() {
   const [lastDirection, setLastDirection] = useState();
   const currentIndexRef = useRef(currentIndex);
   const childRefs = useMemo(() => Array(movies.length).fill(0).map(() => React.createRef()), [movies]);
+  const [gradient, setGradient] = useState('');
+
+  useEffect(() => {
+    const getMovies = async () => {
+      const fetchedMovies = await fetchMovies();
+      setMovies(fetchedMovies);
+      setCurrentIndex(fetchedMovies.length - 1);
+    };
+
+    getMovies();
+  }, []);
 
   const fetchDominantColor = async (url) => {
     const colorThief = new ColorThief();
@@ -24,26 +40,6 @@ function Advanced() {
       img.src = url;
     });
   };
-
-  useEffect(() => {
-    const fetchColor = async () => {
-      const color = await fetchDominantColor(movies[currentIndex]?.url);
-      const gradientStart = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
-      const gradientEnd = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-      setGradient(`linear-gradient(${gradientStart} 33%, ${gradientEnd} 67%)`);
-    };
-
-    fetchColor();
-  }, [currentIndex, movies]);
-
-  useEffect(() => {
-    const getMovies = async () => {
-      const movies = await fetchMovies();
-      setMovies(movies);
-    };
-
-    getMovies();
-  }, []);
 
   const updateCurrentIndex = (val) => {
     setCurrentIndex(val);
@@ -73,57 +69,103 @@ function Advanced() {
     if (!canGoBack) return;
     const newIndex = currentIndex + 1;
     updateCurrentIndex(newIndex);
-    currentIndexRef.current >= newIndex && childRefs[newIndex].current.restoreCard();
+    await childRefs[newIndex].current.restoreCard();
   };
 
+  useEffect(() => {
+    const fetchColor = async () => {
+      const color = await fetchDominantColor(movies[currentIndex]?.url);
+      const gradientStart = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+      const gradientEnd = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      const generatedGradient = `linear-gradient(${gradientStart} 33%, ${gradientEnd} 67%)`;
+      setGradient(generatedGradient);
+    };
+
+    fetchColor();
+  }, [currentIndex, movies]);
+
   const currentMovie = movies[currentIndex] || {};
-  const [gradient, setGradient] = useState('');
 
   return (
     <div className="root" style={{ backgroundImage: gradient }}>
       <link href="https://fonts.googleapis.com/css?family=Damion&display=swap" rel="stylesheet" />
       <link href="https://fonts.googleapis.com/css?family=Alatsi&display=swap" rel="stylesheet" />
       <div className="backgroundImage" style={{ backgroundImage: `url(${currentMovie.url})` }} />
-      <h1> </h1>
+      
       <div className="cardContainer">
-        {movies.map((character, index) => (
+        {movies.map((movie, index) => (
           <TinderCard
             ref={childRefs[index]}
             className="swipe"
-            key={character.name}
-            flickOnSwipe={true}
-            onSwipe={(dir) => swiped(dir, character.name, index)}
-            onCardLeftScreen={() => outOfFrame(character.name, index)}
+            key={movie.id}
+            onSwipe={(dir) => swiped(dir, movie.id, index)}
+            onCardLeftScreen={() => outOfFrame(movie.id, index)}
             preventSwipe={['up', 'down']}
             swipeRequirementType="position"
           >
             <div
-              style={{ backgroundImage: `url(${character.url})` }}
+              style={{ backgroundImage: `url(${movie.url})` }}
               className={`card ${currentIndex === index ? 'current' : ''}`}
             >
-              <h3>{character.name}</h3>
+             
             </div>
           </TinderCard>
         ))}
       </div>
-      <div className="buttons">
-        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('left')}>
-          Swipe left!
-        </button>
-        <button style={{ backgroundColor: !canGoBack && '#c3c4d3' }} onClick={() => goBack()}>
-          Undo swipe!
-        </button>
-        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('right')}>
-          Swipe right!
-        </button>
-      </div>
+      {currentMovie.name && (
+        <div className="movieMeta">
+          <div className="movieTitle">
+            {currentMovie.name}
+          </div>
+          <div className="movieInfo">
+            <p>
+              {currentMovie.year} ‧ {currentMovie.genres.slice(0, 1).join(", ")} 
+              {currentMovie.imdbScore && (
+                <a href={currentMovie.imdbLink} target="_blank" rel="noopener noreferrer">
+                  <span className="imdbScore">{currentMovie.imdbScore}</span>
+                </a>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
+   <div className="buttons">
+   <IconButton
+    color="primary"
+    disabled={!canSwipe}
+    onClick={() => swipe('left')}
+    aria-label="Thumb Down"
+  >
+    <ThumbDownIcon />
+  </IconButton>
+
+  <IconButton
+    color="primary"
+    disabled={!canGoBack}
+    onClick={() => goBack()}
+    aria-label="Undo"
+    size="small"
+  >
+    <UndoIcon />
+  </IconButton>
+
+  <IconButton
+    color="primary"
+    disabled={!canSwipe}
+    onClick={() => swipe('right')}
+    aria-label="Thumb Up"
+  >
+    <ThumbUpIcon />
+  </IconButton>
+</div>
+
       {lastDirection ? (
         <h2 key={lastDirection} className="infoText">
           You swiped {lastDirection}
         </h2>
       ) : (
         <h2 className="infoText">
-          Swipe a card or press a button to get the Restore Card button visible!
+          Swipe a card or press a button to get Restore Card button visible!
         </h2>
       )}
     </div>
