@@ -185,6 +185,7 @@ h2 {
   color: #fff;
   animation-name: popup;
   animation-duration: 800ms;
+  display: none;
 }
 
 .buttons {
@@ -209,9 +210,9 @@ h2 {
     justify-content: center;
   
   border: none;
-  color: #fff;
+  color: #9198e5;
   
-  background-color: #9198e5;
+  background-color: #fff;
   transition: 200ms;
   
   box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1);
@@ -219,8 +220,14 @@ h2 {
 
 .buttons button:hover {
   transform: scale(1.05);
+  background-color: #fff;
 }
 
+
+.Mui-disabled {
+  background-color: rgba(255, 255, 255, 0.26)!important;
+  
+}
 
 @keyframes popup {
   0%   { transform: scale(1, 1); }
