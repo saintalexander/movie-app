@@ -129,14 +129,18 @@ h2 {
   height: 20px;
   letter-spacing: .3px;
   line-height: 20px;
+  
   text-align: center;
+  
 
 }
 
 .movieInfo p{
   display: flex;
   align-items: center;
+  justify-content: center;
   margin: 0px;
+  margin-top: 0.125rem;
 }
 
 .imdbContainer {
