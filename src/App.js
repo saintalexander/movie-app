@@ -1,19 +1,21 @@
-import React, { useState } from 'react'
-import './App.css'
+import React from 'react';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import rootReducer from './reducers'; // Replace 'rootReducer' with your actual root reducer file
+import './App.css';
+import Advanced from './Advanced';
 
+// Create the Redux store using the rootReducer
+const store = createStore(rootReducer);
 
-import Advanced from './Advanced'
-
-
-function App () {
-  
-
+function App() {
   return (
-    <div className='app'>
-      <Advanced /> 
-     
-    </div>
-  )
+    <Provider store={store}>
+      <div className="app">
+        <Advanced />
+      </div>
+    </Provider>
+  );
 }
 
-export default App
+export default App;

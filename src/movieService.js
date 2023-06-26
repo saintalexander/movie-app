@@ -1,3 +1,4 @@
+// movieService.js
 import axios from 'axios';
 
 const API_KEY = 'ad82ec89168667e5ce9d481959e1e57f';
@@ -28,7 +29,7 @@ export const fetchMovies = async () => {
         language: 'en-US',
       },
     });
-    const movies = response.data.results.slice(0, 8); // Limit the movies to 10
+    const movies = response.data.results.slice(0, 8); // Limit the movies to 8
 
     // Fetch IMDb scores for each movie
     const imdbPromises = movies.map((movie) =>
@@ -59,7 +60,6 @@ export const fetchMovies = async () => {
 
 export const fetchRecommendedMovies = async (movieId, existingMovies, limit = 5) => {
   try {
-    // Fetch all genres
     const genresResponse = await axios.get('https://api.themoviedb.org/3/genre/movie/list', {
       params: {
         api_key: API_KEY,
@@ -77,16 +77,8 @@ export const fetchRecommendedMovies = async (movieId, existingMovies, limit = 5)
         language: 'en-US',
       },
     });
-    
-    // Get the ids of existing movies
-    const existingMovieIds = existingMovies.map(movie => movie.id);
 
-    // Filter out the recommended movies that already exist in the existing movies list
-    const uniqueRecommendedMovies = response.data.results.filter(recommendedMovie => 
-      !existingMovieIds.includes(recommendedMovie.id)
-    );
-
-    const recommendedMovies = uniqueRecommendedMovies.slice(0, limit); // Limit the recommended movies
+    const recommendedMovies = response.data.results.slice(0, limit); // Limit the recommended movies
 
     return recommendedMovies.map((movie) => ({
       id: movie.id,
@@ -100,7 +92,6 @@ export const fetchRecommendedMovies = async (movieId, existingMovies, limit = 5)
     }));
   } catch (error) {
     console.error('Error fetching recommended movies:', error);
-    return [];
+    return []; // Return an empty array if there's an error fetching recommended movies
   }
 };
-
