@@ -23,6 +23,7 @@ function Advanced() {
         .map((_, index) => refs[index] || React.createRef())
     );
   }, [movies.length, recommendedMovies.length]);
+
   const [gradient, setGradient] = useState('');
 
   useEffect(() => {
@@ -33,15 +34,17 @@ function Advanced() {
       const refs = Array(fetchedMovies.length).fill(0).map(() => React.createRef());
       setChildRefs(refs);
     };
-  
+
     fetchMoviesData();
   }, []);
-  
-  
+
   useEffect(() => {
     const fetchRecommendedData = async () => {
       if (movies[currentIndex]) {
-        const fetchedRecommendedMovies = await fetchRecommendedMovies(movies[currentIndex].id);
+        const fetchedRecommendedMovies = await fetchRecommendedMovies(
+          movies[currentIndex].id,
+          movies // Pass the 'movies' array as an argument
+        );
         setRecommendedMovies(fetchedRecommendedMovies);
       }
     };
@@ -87,63 +90,64 @@ function Advanced() {
   const canGoBack = currentIndex < movies.length - 1;
   const canSwipe = currentIndex >= 0;
 
+  const MAX_MOVIES_TO_ADD = 2; // Define the maximum number of movies to add
 
-// Initialize a set to store unique movie IDs
-const addedMovieIds = new Set();
-
-const MAX_MOVIES_TO_ADD = 2; // Define the maximum number of movies to add
-
-const swiped = async (direction, movieId, index) => {
-  setLastDirection(direction);
-  const previousIndex = currentIndexRef.current;
-  updateCurrentIndex(index - 1);
-
-  if (direction === 'right') {
-    // Handle swipe right (like)
-    const likedMovie = movies[index];
-    const recommended = await fetchRecommendedMovies(likedMovie.id);
-
-    // Filter out movies that already exist in the array
-    const moviesToAdd = recommended.filter((movie) => !movies.some((m) => m.id === movie.id));
-
-    // Limit the number of movies to add
-    const moviesToAddLimited = moviesToAdd.slice(0, MAX_MOVIES_TO_ADD);
-
-    // Calculate the splice index
-    let spliceIndex = previousIndex + 2 - moviesToAddLimited.length;
-
-    // Perform interleaving of recommended movies
-    const updatedMovies = [...movies];
-    updatedMovies.splice(spliceIndex, 0, ...moviesToAddLimited);
-
-    // Limit the array length and remove movies from the beginning if necessary
-    const maxLength = 15; // Define the maximum array length as desired
-    if (updatedMovies.length > maxLength) {
-      updatedMovies.splice(0, updatedMovies.length - maxLength);
-      spliceIndex = Math.min(spliceIndex, maxLength - moviesToAddLimited.length);
+  const swiped = async (direction, movieId, index) => {
+    setLastDirection(direction);
+    
+    if (direction === 'right') {
+      // Find the current movie's index by matching the movie ID
+      const currentMovieIndex = movies.findIndex((movie) => movie.id === movieId);
+    
+      if (currentMovieIndex >= 0) {
+        const likedMovie = movies[currentMovieIndex];
+    
+        // Calculate the splice index
+        let spliceIndex = Math.max(0, currentMovieIndex - 1); 
+    
+        // Pass the existing movies to the fetchRecommendedMovies function
+        const recommended = await fetchRecommendedMovies(likedMovie.id, movies, MAX_MOVIES_TO_ADD);
+    
+        if (recommended.length > 0) {
+          const updatedMovies = [
+            ...movies.slice(0, spliceIndex),
+            ...recommended,
+            ...movies.slice(spliceIndex)
+          ];
+    
+          setMovies(updatedMovies);
+    
+          // Set the current index to the card which was next before adding the recommended movies.
+          // Given that we add recommended movies before the next card and move towards the start of the array, 
+          // we need to account for the length of the added recommended movies array to land on the correct card.
+          const newCurrentIndex = spliceIndex + recommended.length; 
+          setCurrentIndex(newCurrentIndex);
+        }
+      }
+    } else if (direction === 'left') {
+      // Handle swipe left (dislike)
+      updateCurrentIndex(Math.max(0, index - 1));
     }
+  };
+  
 
-    const addedMoviesCount = moviesToAddLimited.length;
-    const newCurrentIndex = previousIndex - addedMoviesCount + 2;
-    setCurrentIndex(newCurrentIndex);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
-    setMovies(updatedMovies);
-  } else if (direction === 'left') {
-    // Handle swipe left (dislike)
-    // Perform any desired actions here
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   
   
   
@@ -158,7 +162,6 @@ const swiped = async (direction, movieId, index) => {
     // multiple outOfFrame events are queued and the card disappears
     // during the latest swipes. Only the last outOfFrame event should be considered valid
   };
-  
 
   const swipe = async (dir) => {
     if (canSwipe && currentIndex < movies.length) {
@@ -179,15 +182,15 @@ const swiped = async (direction, movieId, index) => {
       <link href="https://fonts.googleapis.com/css?family=Alatsi&display=swap" rel="stylesheet" />
       <div className="backgroundImage" style={{ backgroundImage: `url(${movies[currentIndex]?.url})` }} />
       <div className="movieArray" style={{ color: `#fff` }}>
-      <span className="movieItem">
-    Total Movies: {movies.length}
-  </span>
-  <span className="movieItem">
-    Total Popular Movies: {movies.filter((movie) => movie.source === 'popular').length}
-  </span>
-  <span className="movieItem">
-    Total Recommended Movies: {movies.filter((movie) => movie.source === 'recommended').length}
-  </span>
+        <span className="movieItem">
+          Total Movies: {movies.length}
+        </span>
+        <span className="movieItem">
+          Total Popular Movies: {movies.filter((movie) => movie.source === 'popular').length}
+        </span>
+        <span className="movieItem">
+          Total Recommended Movies: {movies.filter((movie) => movie.source === 'recommended').length}
+        </span>
         {movies.map((movie) => (
           <span key={movie.id} className="movieItem">
             {movie.id} - {movie.name} ({movie.source === 'popular' ? 'Popular' : 'Recommended'})
@@ -220,7 +223,7 @@ const swiped = async (direction, movieId, index) => {
           </div>
           <div className="movieInfo">
             <p>
-              {currentMovie.year} ‧ {currentMovie.genres.slice(0, 1).join(", ")} 
+              {currentMovie.year} ‧ {currentMovie.genres.slice(0, 1).join(", ")}
               {currentMovie.imdbScore && (
                 <a href={currentMovie.imdbLink} target="_blank" rel="noopener noreferrer">
                   <span className="imdbScore">{currentMovie.imdbScore}</span>
