@@ -1,16 +1,13 @@
-// movieService.js
 import axios from 'axios';
 
-const API_KEY = 'ad82ec89168667e5ce9d481959e1e57f';
+const API_KEY = 'ad82ec89168667e5ce9d481959e1e57f'; // Replace with your actual API key
 
-// Helper function to get year from release_date
 const getYear = (releaseDate) => {
   return new Date(releaseDate).getFullYear();
 };
 
 export const fetchMovies = async () => {
   try {
-    // Fetch all genres
     const genresResponse = await axios.get('https://api.themoviedb.org/3/genre/movie/list', {
       params: {
         api_key: API_KEY,
@@ -21,7 +18,6 @@ export const fetchMovies = async () => {
       return obj;
     }, {});
 
-    // Fetch popular movies
     const response = await axios.get('https://api.themoviedb.org/3/movie/popular', {
       params: {
         api_key: API_KEY,
@@ -29,9 +25,8 @@ export const fetchMovies = async () => {
         language: 'en-US',
       },
     });
-    const movies = response.data.results.slice(0, 8); // Limit the movies to 8
+    const movies = response.data.results.slice(0, 8);
 
-    // Fetch IMDb scores for each movie
     const imdbPromises = movies.map((movie) =>
       axios.get(`https://api.themoviedb.org/3/movie/${movie.id}/external_ids`, {
         params: {
@@ -50,7 +45,7 @@ export const fetchMovies = async () => {
       genres: movie.genre_ids.slice(0, 3).map((id) => genres[id]).filter(Boolean),
       imdbScore: imdbScores[index] ? movie.vote_average : null,
       imdbLink: imdbScores[index] ? `https://www.imdb.com/title/${imdbScores[index]}` : null,
-      source: 'popular', // Add the "source" property to indicate it's from popular movies
+      source: 'popular',
     }));
   } catch (error) {
     console.error('Error fetching movies:', error);
@@ -78,7 +73,7 @@ export const fetchRecommendedMovies = async (movieId, existingMovies, limit = 5)
       },
     });
 
-    const recommendedMovies = response.data.results.slice(0, limit); // Limit the recommended movies
+    const recommendedMovies = response.data.results.slice(0, limit);
 
     return recommendedMovies.map((movie) => ({
       id: movie.id,
@@ -88,10 +83,10 @@ export const fetchRecommendedMovies = async (movieId, existingMovies, limit = 5)
       genres: movie.genre_ids.slice(0, 3).map((id) => genres[id]).filter(Boolean),
       imdbScore: movie.vote_average,
       imdbLink: `https://www.imdb.com/title/${movie.imdb_id}`,
-      source: 'recommended', // Add the "source" property to indicate it's from recommended movies
+      source: 'recommended',
     }));
   } catch (error) {
     console.error('Error fetching recommended movies:', error);
-    return []; // Return an empty array if there's an error fetching recommended movies
+    return [];
   }
 };

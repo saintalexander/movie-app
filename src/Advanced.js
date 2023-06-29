@@ -1,112 +1,173 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useRef, useEffect } from 'react';
 import TinderCard from 'react-tinder-card';
-import ColorThief from 'colorthief';
-import { fetchMovies, fetchRecommendedMovies } from './movieService';
-import { swipeRight, swipeLeft, swipeUp } from './actions';
-import IconButton from '@mui/material/IconButton';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import UndoIcon from '@mui/icons-material/Undo';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import SkipNextIcon from '@mui/icons-material/SkipNext';
+
+const API_KEY = 'ad82ec89168667e5ce9d481959e1e57f';
+const PopularMoviesEndpoint = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+
+const shuffleArray = (array) => {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+};
 
 const Advanced = () => {
-  const movies = useSelector((state) => state.movies);
-  const currentIndex = useSelector((state) => state.currentIndex);
-  const dispatch = useDispatch();
+  const [movies, setMovies] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [lastDirection, setLastDirection] = useState();
+  const currentIndexRef = useRef(currentIndex);
+  const childRefs = useRef([]);
+  const buttonSwipeRef = useRef(false);
 
-  useEffect(() => {
-    const fetchMoviesData = async () => {
-      const fetchedMovies = await fetchMovies();
-      dispatch({ type: 'FETCH_MOVIES_SUCCESS', movies: fetchedMovies });
-    };
-
-    fetchMoviesData();
-  }, [dispatch]);
-
-  const swiped = async (direction, movieId, index) => {
-    if (direction === 'right') {
-      const likedMovie = movies.find((movie) => movie.id === movieId);
-      const recommended = await fetchRecommendedMovies(likedMovie.id, movies);
-      const newIndex = currentIndex + 1;
-      dispatch(swipeRight(recommended, newIndex));
-    } else if (direction === 'left') {
-      dispatch(swipeLeft());
+  const fetchMovies = async () => {
+    try {
+      const response = await fetch(PopularMoviesEndpoint);
+      const data = await response.json();
+      const popularMovies = data.results.map(movie => ({ ...movie, source: 'Popular' }));
+      const shuffledMovies = shuffleArray(popularMovies);
+      setMovies(shuffledMovies);
+      setCurrentIndex(shuffledMovies.length - 1);
+      childRefs.current = Array(shuffledMovies.length).fill(0).map(() => React.createRef());
+    } catch (error) {
+      console.log('Error fetching movies:', error);
     }
   };
 
-  const outOfFrame = (name, idx) => {
-    console.log(`${name} (${idx}) left the screen!`);
-  };
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  const canGoBack = currentIndex < movies.length - 1;
+  const canSwipe = currentIndex >= 0;
 
   const swipe = (dir) => {
-    if (dir === 'right') {
-      const likedMovie = movies[currentIndex];
-      const newIndex = currentIndex + 1;
-      dispatch(swipeRight([likedMovie], newIndex));
-    } else if (dir === 'left') {
-      dispatch(swipeLeft());
-    } else if (dir === 'up') {
-      dispatch(swipeUp());
+    if (canSwipe && currentIndex < movies.length) {
+      if (childRefs.current[currentIndex] && childRefs.current[currentIndex].current) {
+        buttonSwipeRef.current = true;
+        childRefs.current[currentIndex].current.swipe(dir);
+        buttonSwipeRef.current = false;
+        setCurrentIndex((prevIndex) => prevIndex - 1);
+      } else {
+        console.log(`Ref not available for index ${currentIndex}`);
+      }
+    } else {
+      console.log('Cannot swipe');
     }
   };
 
   const goBack = () => {
-    dispatch(swipeLeft());
+    if (!canGoBack) return;
+
+    const newIndex = currentIndex + 1;
+    const cardRef = childRefs.current[newIndex];
+
+    if (cardRef && cardRef.current) {
+      cardRef.current.restoreCard();
+    }
+
+    setCurrentIndex(newIndex);
   };
 
-  const currentMovie = movies[currentIndex] || {};
+  const swiped = (direction, movie, index) => {
+    console.log('Swiped function called.');
+    setLastDirection(direction);
+    if (!buttonSwipeRef.current) {
+      setCurrentIndex(index - 1);
+    }
+  
+    if (direction === 'right') {
+      fetchRecommendedMovies(movie.id);
+    }
+  };
+
+  const fetchRecommendedMovies = async (movieId) => {
+    const recommendedEndpoint = `https://api.themoviedb.org/3/movie/${movieId}/recommendations?api_key=${API_KEY}&language=en-US&page=1`;
+    try {
+      const response = await fetch(recommendedEndpoint);
+      const data = await response.json();
+      const recommendedMovies = data.results.filter((movie) => !movies.some((m) => m.id === movie.id));
+
+      if (recommendedMovies.length >= 2 && currentIndexRef.current >= 3) {
+        const recommendedMoviesWithSource = recommendedMovies.map(movie => ({ ...movie, source: 'Recommended' }));
+        setMovies((prevMovies) => {
+          const newMovies = [...prevMovies];
+          const twoRecommendedMovies = recommendedMoviesWithSource.slice(0, 2);
+          newMovies.splice(currentIndexRef.current - 3, 2, ...twoRecommendedMovies);
+          return newMovies;
+        });
+      } else {
+        console.log('Cannot fetch recommended movies. Less than 3 cards until start of array or bottom of stack.');
+      }
+    } catch (error) {
+      console.log('Error fetching recommended movies:', error);
+    }
+  };
 
   return (
     <div>
+      <link href="https://fonts.googleapis.com/css?family=Damion&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css?family=Alatsi&display=swap" rel="stylesheet" />
+      <h1>React Tinder Card</h1>
       <div className="cardContainer">
         {movies.map((movie, index) => (
           <TinderCard
+            ref={childRefs.current[index]}
             className="swipe"
             key={movie.id}
-            onSwipe={(dir) => swiped(dir, movie.id, index)}
-            onCardLeftScreen={() => outOfFrame(movie.name, index)}
-            preventSwipe={['down']}
+            onSwipe={(dir) => swiped(dir, movie, index)}
+            onCardLeftScreen={() => {}}
+            swipeRequirementType="position"
           >
             <div
-              style={{ backgroundImage: `url(${movie.url})` }}
-              className={`card ${currentIndex === index ? 'current' : ''}`}
+              style={{ backgroundImage: `url(https://image.tmdb.org/t/p/w500/${movie.poster_path})` }}
+              className="card"
             >
-              {/* Render card content here */}
+              <h3>{movie.title}</h3>
             </div>
           </TinderCard>
         ))}
       </div>
-      <div className="movieMeta">
-        <div className="movieTitle">
-          {currentMovie.name}
-        </div>
-        <div className="movieInfo">
-          <p>
-            {/* Render movie info here */}
-            {currentMovie.year} ‧ {currentMovie.genres && currentMovie.genres.slice(0, 1).join(", ")}
-            {currentMovie.imdbScore && (
-              <a href={currentMovie.imdbLink} target="_blank" rel="noopener noreferrer">
-                <span className="imdbScore">{currentMovie.imdbScore}</span>
-              </a>
-            )}
-          </p>
-        </div>
-      </div>
       <div className="buttons">
-        <IconButton color="primary" onClick={() => swipe('left')} aria-label="Thumb Down">
-          <ThumbDownIcon />
-        </IconButton>
-        <IconButton color="primary" onClick={goBack} aria-label="Undo" size="small">
-          <UndoIcon />
-          <IconButton color="primary" onClick={() => swipe('up')} aria-label="Skip">
-  <SkipNextIcon />
-</IconButton>
-
-        </IconButton>
-        <IconButton color="primary" onClick={() => swipe('right')} aria-label="Thumb Up">
-          <ThumbUpIcon />
-        </IconButton>
+        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('left')}>
+          Swipe left!
+        </button>
+        <button style={{ backgroundColor: !canGoBack && '#c3c4d3' }} onClick={goBack}>
+          Undo swipe!
+        </button>
+        <button style={{ backgroundColor: !canSwipe && '#c3c4d3' }} onClick={() => swipe('right')}>
+          Swipe right!
+        </button>
+      </div>
+      {lastDirection ? (
+        <h2 key={lastDirection} className="infoText">
+          You swiped {lastDirection}
+        </h2>
+      ) : (
+        <h2 className="infoText">
+          Swipe a card or press a button to get Restore Card button visible!
+        </h2>
+      )}
+      <div className="arrayList">
+        <h2>Array List</h2>
+        <ul>
+          {movies.map((movie, index) => (
+            <li
+              key={movie.id}
+              style={{ color: index === currentIndex ? 'green' : 'black' }}
+            >
+              <span>Movie ID: {movie.id}</span>
+              <span>Movie Name: {movie.title}</span>
+              <span>Source: {movie.source || 'Popular'}</span>
+            </li>
+          ))}
+        </ul>
+        <p>Total number of items in array: {movies.length}</p>
       </div>
     </div>
   );

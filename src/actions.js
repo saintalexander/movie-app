@@ -1,14 +1,14 @@
 // actions.js
 export const swipeRight = (movieId, index) => {
   return {
-    type: 'SWIPE_RIGHT',
+    type: 'movies/swipeRight', // Update the action type
     payload: { movieId, index }
   };
 };
 
 export const swipeLeft = () => {
   return {
-    type: 'SWIPE_LEFT'
+    type: 'movies/swipeLeft' // Update the action type
   };
 };
 

@@ -18,18 +18,18 @@ const recommendedReducer = (state = [], action) => {
       return state;
   }
 };
-
 const currentIndexReducer = (state = 0, action) => {
   switch (action.type) {
-    case 'SWIPE_LEFT':
+    case 'movies/swipeLeft': // Update the action type
       return Math.max(0, state - 1);
-    case 'SWIPE_RIGHT':
-    case 'SWIPE_UP':
+    case 'movies/swipeRight': // Update the action type
+    case 'movies/swipeUp': // Update the action type
       return state + 1;
     default:
       return state;
   }
 };
+
 
 const rootReducer = combineReducers({
   movies: moviesReducer,
