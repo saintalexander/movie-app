@@ -272,7 +272,7 @@ const Advanced = () => {
   </IconButton>
 </div>
 
-      <div className="arrayList">
+      {/* <div className="arrayList">
         <h2>Array List</h2>
         <ul>
           {movies.map((movie, index) => (
@@ -296,7 +296,7 @@ const Advanced = () => {
         <h2 className="infoText">
           Swipe a card or press a button to get Restore Card button visible!
         </h2>
-      )}
+      )} */}
     </div>
   );
 };
