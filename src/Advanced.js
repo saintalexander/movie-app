@@ -1,14 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import TinderCard from 'react-tinder-card';
 import ColorThief from 'colorthief';
+import axios from 'axios';
 import IconButton from '@mui/material/IconButton';
 import ThumbDownOutlinedIcon from '@mui/icons-material/ThumbDownOutlined';
 import UndoIcon from '@mui/icons-material/Undo';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 
 const API_KEY = 'ad82ec89168667e5ce9d481959e1e57f';
-const PopularMoviesEndpoint = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
-const GenresEndpoint = `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`;
+const PopularMoviesEndpoint = `/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+const GenresEndpoint = `/genre/movie/list?api_key=${API_KEY}&language=en-US`;
+
+const instance = axios.create({
+  baseURL: 'https://api.themoviedb.org/3',
+});
 
 const shuffleArray = (array) => {
   const newArray = [...array];
@@ -33,9 +38,8 @@ const Advanced = () => {
 
   const fetchMovies = async () => {
     try {
-      const response = await fetch(PopularMoviesEndpoint);
-      const data = await response.json();
-      const popularMovies = data.results.map((movie) => ({
+      const response = await instance.get(PopularMoviesEndpoint);
+      const popularMovies = response.data.results.map((movie) => ({
         ...movie,
         source: 'Popular',
         releaseYear: movie.release_date.split('-')[0],
@@ -56,10 +60,9 @@ const Advanced = () => {
 
   const fetchGenres = async () => {
     try {
-      const response = await fetch(GenresEndpoint);
-      const data = await response.json();
+      const response = await instance.get(GenresEndpoint);
       const genresData = {};
-      data.genres.forEach((genre) => {
+      response.data.genres.forEach((genre) => {
         genresData[genre.id] = genre.name;
       });
       setGenres(genresData);
@@ -119,7 +122,6 @@ const Advanced = () => {
     }
 
     if (direction === 'left') {
-    
       leftButtonRef.current.style.backgroundColor = 'white';
       leftButtonRef.current.style.color = '#9198e5';
       leftButtonRef.current.style.transform = 'scale(1)';
@@ -131,11 +133,10 @@ const Advanced = () => {
   };
 
   const fetchRecommendedMovies = async (movieId) => {
-    const recommendedEndpoint = `https://api.themoviedb.org/3/movie/${movieId}/recommendations?api_key=${API_KEY}&language=en-US&page=1`;
+    const recommendedEndpoint = `/movie/${movieId}/recommendations?api_key=${API_KEY}&language=en-US&page=1`;
     try {
-      const response = await fetch(recommendedEndpoint);
-      const data = await response.json();
-      const recommendedMovies = data.results.filter((movie) => {
+      const response = await instance.get(recommendedEndpoint);
+      const recommendedMovies = response.data.results.filter((movie) => {
         if (movies.some((m) => m.id === movie.id)) {
           return false;
         }
@@ -186,7 +187,7 @@ const Advanced = () => {
   useEffect(() => {
     const fetchColor = async () => {
       const color = await fetchDominantColor(
-        `https://image.tmdb.org/t/p/w500/${movies[currentIndex]?.poster_path}`
+        `https://image.tmdb.org/t/p/w220_and_h330_face/${movies[currentIndex]?.poster_path}`
       );
       const gradientStart = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
       const gradientEnd = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
@@ -210,15 +211,13 @@ const Advanced = () => {
   };
 
   const onSwipeRequirementUnfulfilled = (direction) => {
-   
-      leftButtonRef.current.style.backgroundColor = 'white';
-      leftButtonRef.current.style.color = '#9198e5';
-      leftButtonRef.current.style.transform = 'scale(1)';
-    
-      rightButtonRef.current.style.backgroundColor = 'white';
-      rightButtonRef.current.style.color = '#9198e5';
-      rightButtonRef.current.style.transform = 'scale(1)';
-    
+    leftButtonRef.current.style.backgroundColor = 'white';
+    leftButtonRef.current.style.color = '#9198e5';
+    leftButtonRef.current.style.transform = 'scale(1)';
+
+    rightButtonRef.current.style.backgroundColor = 'white';
+    rightButtonRef.current.style.color = '#9198e5';
+    rightButtonRef.current.style.transform = 'scale(1)';
   };
 
   return (
