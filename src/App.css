@@ -1,9 +1,10 @@
 html, body {
-  overflow: hidden;
+  /* overflow: hidden; */
   height: 100%;
   width: 100%;
   margin: 0;
   padding: 0;
+  background-color: rgba(25, 23, 24, 1);
 }
 
 body {
@@ -20,6 +21,11 @@ body {
   min-height: 100vh;
   overflow: hidden;
   background-image: linear-gradient(rgba(25, 23, 24, 0.2) 33%, rgb(25, 23, 24) 67%);
+  -webkit-transition: background-image 0.5s ease-in-out;  
+  -moz-transition: background-image 0.5s ease-in-out;   
+  -o-transition: background-image 0.5s ease-in-out;   
+  transition: background-image 0.5s ease-in-out;  
+
   opacity: 1;
 }
 .backgroundImage {
@@ -48,7 +54,10 @@ body {
   
   -webkit-transform: scale(1.6);
   transform: scale(1.6);
-  
+  -webkit-transition: background-image 0.5s ease-in-out;  
+  -moz-transition: background-image 0.5s ease-in-out;   
+  -o-transition: background-image 0.5s ease-in-out;   
+  transition: background-image 0.5s ease-in-out;  
   z-index: -1;
   
 }
@@ -259,7 +268,7 @@ h2 {
   
   background-color: #fff;
   transition: 200ms;
-  
+  transition: background-color 300ms ease-out 0s, color 300ms ease-out 0s, opacity 300ms ease-out 0s, transform 300ms ease-out 0s;
   box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.1);
 }
 
