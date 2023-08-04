@@ -1,3 +1,5 @@
+@import "~react-responsive-carousel/lib/styles/carousel.min.css";
+
 html, body {
   overflow: hidden;
   height: 100vh;
@@ -11,7 +13,7 @@ body {
   position: fixed;
 }
 
-.recomovi-swiper {
+.recomovi-root {
   text-align: center;
   display: flex;
   justify-content: center;
@@ -22,13 +24,12 @@ body {
   transition: background-image 0.5s ease-in-out;
   -webkit-transition: background-image 0.5s ease-in-out;
   opacity: 1;
- 
+  background-image: linear-gradient(rgba(52, 66, 102, 0.2) 33%, rgb(52, 66, 102) 67%);
+  
 }
 
 .MuiToolbar-root {
-  padding-left: 24px!important;
-  padding-right: 24px!important;
-  min-height: 64px!important;
+  min-height: 48px !important;
 }
 
 .backgroundImage {
@@ -47,9 +48,7 @@ body {
   right: -10px;
   -webkit-filter: blur(10px);
   filter: blur(10px);
- 
   opacity: 1;
- 
   transition: background-image 0.2s ease-in-out;
   -webkit-transition: background-image 0.2s ease-in-out;
   z-index: -1;
@@ -61,18 +60,18 @@ body {
 }
 
 .app {
-  overflow: hidden!important;
+  overflow: hidden !important;
   transition: margin-left 0.3s ease-in-out;
-
 }
+
 .drawer-open {
   margin-left: -50vw; /* Adjust the value as per your drawer width */
 }
 
 .main-content {
- 
   transition: margin-left 0.3s ease-in-out;
 }
+
 .app > div > div {
   width: 100%;
   display: flex;
@@ -105,42 +104,46 @@ h2 {
 }
 
 .cardContainer {
-  width: 100%;
-  max-width: 342px;
-  height: 456px;
-  margin: 16px 24px 24px;
-  perspective: 500px;
+  display: inline-block;
+  width: 80vw;
+  height: calc(80vw * 407 / 305);
+  max-width: 420px;
+  max-height: 561px;
+  margin: 24px;
   perspective-origin: center -33%;
+  perspective: 500px;
+  align-items: center;
+  justify-content: center;
 }
 
 .card {
   background-color: #fff;
-  width: 342px;
-  height: 456px;
+  width: 80vw;
+  height: calc(80vw * 407 / 305);
+  max-width: 420px;
+  max-height: 561px;
   border-radius: 8px;
   background-size: cover;
   background-position: center;
   margin-top: -20px;
-  left: 0;
   z-index: 1000;
-  transform: scale(0.9);
+  transform: translate3d(0, 0, -200px) scale(0.9);
   transform-origin: top center;
-  transition: transform 300ms ease-in-out 0s;
+  transition: transform 300ms ease-in-out 0s, opacity 300ms ease-in-out 0s;
   will-change: transform;
+ 
 }
 
 .current .card {
   margin-top: 0px;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
-  transform: scale(1);
-  transition: transform 300ms ease-in-out;
-  transform: translate3d(0, 0, 0);
-  will-change: transform;
+  transform: translate3d(0, 0, 0) scale(1);
 }
 
 .swipe:nth-last-of-type(2) .card {
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
 }
+
 
 .cardContent {
   width: 100%;
@@ -156,7 +159,7 @@ h2 {
 }
 
 .movieMeta a {
-  color: #fff!important;
+  color: #fff !important;
   text-decoration: none;
   justify-content: center;
   display: flex;
@@ -184,7 +187,7 @@ h2 {
 .movieInfo {
   font-size: 12px;
   height: 20px;
-  letter-spacing: .3px;
+  letter-spacing: 0.3px;
   line-height: 20px;
   text-align: center;
   animation-name: popup;
@@ -226,7 +229,7 @@ h2 {
   margin-bottom: auto;
   min-width: 1.5rem;
   border-width: 1px;
-  padding: 0.125rem 0.125rem;
+  padding: 0.125rem;
 }
 
 .infoText {
@@ -244,6 +247,13 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.buttons p {
+  color: #fff;
+  font-size: 12px;
+  line-height: 16px;
+  text-align: center;
 }
 
 .buttons button {
@@ -267,23 +277,217 @@ h2 {
 }
 
 .rightButton:hover {
-  background-color: #1e8e3e!important;
-  color: white!important;
+  background-color: #1e8e3e !important;
+  color: white !important;
 }
+
 .leftButton:hover {
-  background-color: #d93025!important;
-  color: white!important;
+  background-color: #d93025 !important;
+  color: white !important;
 }
+
 .Mui-disabled {
-  background-color: rgba(255, 255, 255, 0.26)!important;
+  background-color: rgba(255, 255, 255, 0.26) !important;
+}
+
+.messageContent {
+  color: #fff;
+  font-weight: 400;
+}
+
+.messageImage {
+  margin-right: -50px;
+}
+
+.messageImage > div {
+  max-width: 260px;
+  height: 260px;
+  margin: auto;
+  padding: 16px;
+}
+
+.messageTitle {
+  margin: 0 40px;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.messageSubtitle {
+  margin: 8px 40px 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.buttonContainer {
+  margin-top: 10px;
+  display: inline-grid !important;
+}
+
+.continueButton {
+  margin: 6px !important;
+  text-transform: none !important;
+  background-color: #4285f4 !important;
+  font-size: 14px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 16px !important;
+}
+
+.viewRecButton {
+  margin: 6px !important;
+  text-transform: none !important;
+  background-color: #202124 !important;
+  font-size: 14px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding: 0 16px !important;
+}
+
+.recomovi-swiper {
+  display: block;
+  justify-items: center;
+  animation: slideUp 1s 0.5s ease-out both;
 }
 
 @keyframes popup {
-  0% { transform: scale(1, 1); }
-  10% { transform: scale(1.1, 1.1); }
-  30% { transform: scale(0.9, 0.9); }
-  50% { transform: scale(1, 1); }
-  57% { transform: scale(1, 1); }
-  64% { transform: scale(1, 1); }
-  100% { transform: scale(1, 1); }
+  0% {
+    transform: scale(1, 1);
+  }
+  10% {
+    transform: scale(1.1, 1.1);
+  }
+  30% {
+    transform: scale(0.9, 0.9);
+  }
+  50% {
+    transform: scale(1, 1);
+  }
+  57% {
+    transform: scale(1, 1);
+  }
+  64% {
+    transform: scale(1, 1);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* iPhone SE */
+@media only screen and (min-device-width: 375px) and (max-device-height: 667px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 305px;
+    height: 407px;
+  }
+}
+
+/* iPhone XR */
+@media only screen and (min-device-width: 414px) and (max-device-height: 896px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 305px;
+    height: 407px;
+  }
+}
+
+/* iPhone 12 Pro */
+@media only screen and (min-device-width: 390px) and (max-device-height: 844px) and (-webkit-min-device-pixel-ratio: 3) {
+  .card,
+  .cardContainer {
+    width: 342px;
+    height: 456px;
+  }
+}
+
+/* Pixel 5 */
+@media only screen and (min-device-width: 393px) and (max-device-height: 851px) and (-webkit-min-device-pixel-ratio: 3) {
+  .card,
+  .cardContainer {
+    width: 345px;
+    height: 460px;
+  }
+}
+
+/* Galaxy S8+ */
+@media only screen and (min-device-width: 260px) and (max-device-height: 740px) and (-webkit-min-device-pixel-ratio: 4) {
+  .card,
+  .cardContainer {
+    width: 312px;
+    height: 416px;
+  }
+}
+
+/* Galaxy S20 Ultra */
+@media only screen and (min-device-width: 412px) and (max-device-height: 915px) and (-webkit-min-device-pixel-ratio: 3) {
+  .card,
+  .cardContainer {
+    width: 363px;
+    height: 485px;
+  }
+}
+
+/* iPad Air */
+@media only screen and (min-device-width: 820px) and (max11-device-height: 1180px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 690px;
+    height: 920px;
+  }
+}
+
+/* iPad mini */
+@media only screen and (min-device-width: 768px) and (max-device-height: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 573px;
+    height: 764px;
+  }
+}
+
+/* Surface Pro 7 */
+@media only screen and (min-device-width: 912px) and (max-device-height: 1368px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 831px;
+    height: 1108px;
+  }
+}
+
+/* Surface Pro Duo */
+@media only screen and (min-device-width: 540px) and (max-device-height: 720px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 345px;
+    height: 460px;
+  }
+}
+
+/* Galaxy Fold */
+@media only screen and (min-device-width: 280px) and (max-device-height: 653px) and (-webkit-min-device-pixel-ratio: 2) {
+  .card,
+  .cardContainer {
+    width: 231px;
+    height: 309px;
+  }
+}
+
+/* Nest Hub */
+@media only screen and (min-device-width: 1024px) and (max-device-height: 600px) and (-webkit-min-device-pixel-ratio: 1.5) {
+  .card,
+  .cardContainer {
+    width: 305px;
+    height: 407px;
+  }
 }

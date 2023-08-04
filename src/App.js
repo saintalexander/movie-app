@@ -16,7 +16,7 @@ const App = () => {
     <div className={`app ${open ? 'drawer-open' : ''}`}>
       <Header handleDrawerToggle={handleDrawerToggle} />
       <div className="main-content">
-        <Advanced setLikedItems={setLikedItems} likedItems={likedItems} />
+        <Advanced setLikedItems={setLikedItems} likedItems={likedItems} handleDrawerToggle={handleDrawerToggle} />
       </div>
       <DrawerComponent open={open} handleDrawerToggle={handleDrawerToggle} likedItems={likedItems} />
     </div>

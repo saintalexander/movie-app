@@ -17,13 +17,18 @@
     "colorthief": "^2.4.0",
     "cors-anywhere": "^0.4.4",
     "dotenv": "^16.1.4",
+    "lottie-web": "^5.12.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-player": "^2.12.0",
     "react-redux": "^8.1.1",
+    "react-responsive-carousel": "^3.2.23",
     "react-scripts": "5.0.1",
+    "react-slick": "^0.29.0",
     "react-swipeable": "^7.0.1",
     "react-tinder-card": "^1.6.2",
     "redux": "^4.2.1",
+    "slick-carousel": "^1.8.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

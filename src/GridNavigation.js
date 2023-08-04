@@ -13,8 +13,8 @@ const GridNavigation = ({ items, handleCardClick, itemsInViewport }) => (
               padding: '1rem',
               paddingLeft: '2rem',
               gap: '0.8rem',
-              marginLeft: '-1rem',
-              marginRight: '-1rem',
+              marginLeft: '-2rem',
+              marginRight: '-2rem',
             }}
           >
              {items.map((item, index) => (

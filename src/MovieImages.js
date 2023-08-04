@@ -29,7 +29,7 @@ const MovieImages = ({ movieId, type }) => {
     <div>
       {backdropImage ? (
         <img
-          src={`https://image.tmdb.org/t/p/original${backdropImage}`}
+          src={`https://image.tmdb.org/t/p/w780/${backdropImage}`}
           alt="Backdrop Image"
           style={{   position: 'absolute',
           top: '0',

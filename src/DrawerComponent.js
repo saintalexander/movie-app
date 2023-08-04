@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import Drawer from '@mui/material/Drawer';
+import PropTypes from 'prop-types';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import Box from '@mui/material/Box';
-import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { useMediaQuery, useTheme } from '@mui/material';
 import ModalComponent from './ModalComponent';
 import GridNavigation from './GridNavigation';
@@ -35,25 +38,21 @@ const DrawerComponent = ({ open, handleDrawerToggle, likedItems }) => {
     setSelectedItemIndex(index);
   };
 
-  const TabPanel = (props) => {
-    const { children, value, index, ...other } = props;
+  const itemsInViewport = isMobile ? 3 : 8;
 
+  const TabPanel = ({ children, value, index }) => {
     return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-        {...other}
-      >
-        {value === index && <Box>{children}</Box>}
+      <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`}>
+        {value === index && children}
       </div>
     );
   };
 
-  const drawerWidth = isMobile ? '100vw' : '50vw'; // Adjust width based on device type
-
-  const itemsInViewport = isMobile ? 3 : 8;
+  DrawerComponent.propTypes = {
+    open: PropTypes.bool,
+    handleDrawerToggle: PropTypes.func.isRequired,
+    likedItems: PropTypes.array.isRequired
+  };
 
   return (
     <>
@@ -62,36 +61,33 @@ const DrawerComponent = ({ open, handleDrawerToggle, likedItems }) => {
         handleModalClose={handleModalClose}
         handleModalNavigation={handleModalNavigation}
         likedItems={likedItems}
-        drawerWidth={drawerWidth} // Pass drawerWidth as a prop to ModalComponent
+        drawerWidth="100vw"
       />
-      <Drawer anchor="right" open={open} onClose={handleDrawerClose}>
-        <div
-          style={{
-            width: drawerWidth,
-            height: '100vh',
-            backgroundColor: 'white',
-            padding: '0rem',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden', // Prevent horizontal scrolling
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <IconButton
-              color="inherit"
-              aria-label="close drawer"
-              edge="end"
-              onClick={handleDrawerClose}
-              style={{
-                borderRadius: '50%',
-                padding: '8px',
-                margin: '1rem',
-                backgroundColor: 'rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </div>
+      <Dialog
+        open={open}
+        onClose={handleDrawerClose}
+        fullScreen
+        fullWidth
+        maxWidth="xl"
+        PaperProps={{
+          style: { backgroundColor: 'white', padding: 0, overflow: 'hidden' },
+        }}
+      >
+        <DialogTitle>
+          <IconButton
+            color="inherit"
+            aria-label="close drawer"
+            edge="start"
+            onClick={handleDrawerClose}
+            style={{
+              color: '#000',
+              backgroundColor: 'rgb(0, 0, 0, 0.05)',
+            }}
+          >
+            <ChevronLeftIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
           <Tabs
             value={tabValue}
             onChange={handleTabChange}
@@ -99,7 +95,7 @@ const DrawerComponent = ({ open, handleDrawerToggle, likedItems }) => {
             indicatorColor="primary"
             textColor="primary"
             aria-label="simple tabs example"
-            style={{ width: '100%', justifyContent: 'space-between' }}
+            style={{ justifyContent: 'space-between', marginBottom: '2rem' }}
           >
             <Tab label="Liked" style={{ width: '50%', justifyContent: 'center', display: 'flex' }} />
             <Tab
@@ -107,12 +103,18 @@ const DrawerComponent = ({ open, handleDrawerToggle, likedItems }) => {
               style={{ width: '50%', justifyContent: 'center', display: 'flex' }}
             />
           </Tabs>
+          <div style={{ color: '#000', font: '20px/26px Google Sans,Roboto,Helvetica Neue,Arial,sans-serif' }}>
+            Top picks for you
+          </div>
           <GridNavigation items={likedItems} handleCardClick={handleCardClick} itemsInViewport={itemsInViewport} />
           <TabPanel value={tabValue} index={1}>
             {/* Populate your recommended items here */}
           </TabPanel>
-        </div>
-      </Drawer>
+        </DialogContent>
+        <DialogActions>
+          {/* Add your actions here */}
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
